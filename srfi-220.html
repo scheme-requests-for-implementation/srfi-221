@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SRFI 220: Generator/accumulator sub-library</title>
+    <link href="/favicon.png" rel="icon" sizes="192x192" type="image/png">
+    <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1"></head>
+  <body>
+    <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg" alt="SRFI logo" /></a>220: Generator/accumulator sub-library</h1>
+
+<p>by John Cowan (text), Arvydas Silanskas (implementation)</p>
+
+<h2 id="status">Status</h2>
+
+The editor will add this section.
+
+<h2 id="abstract">Abstract</h2>
+
+This is a set of convenience routines for generators and accumulators
+intended to blend in with
+<a href="https://srfi.schemers.org/srfi-158/srfi-158.html">SRFI 158</a>.
+This SRFI recommends that they be added to the
+<code>(srfi 158)</code> library provided by
+users or implementations.
+If they are approved by the R7RS-large process,
+they can also be added to <code>(r7rs generator)</code>.
+
+<h2 id="issues">Issues</h2>
+
+None at present.
+
+<h2 id="rationale">Rationale</h2>
+
+<p>The procedures of this SRFI, in cooperation with those
+of SRFI 158, make it easier to set up and make use of
+pipelines of generators.
+In particular, the <code>gchain-generators</code> procedure
+allows the creation of just such a pipeline, starting with an
+initial generator and adding generator operations to it
+to produce a desired result.<p>
+
+<p>The <code>accumulate-generated-values</code>
+procedure captures the output of a generator
+and passes it directly to an accumulator
+until the generator is exhausted.  The
+generator can also be a <code>gchain-generators</code> chain,
+which allows arbitrary transformations.</p>
+
+<p>The <code>gdelete-duplicates</code> procedure is an enhancement
+of the SRFI 158 procedure <code>gdelete-neighbor-dups</code>
+that can delete duplicates without requiring them to be adjacent results.<p>
+
+<p>The <code>genumerate</code> procedure attaches increasing
+non-negative exact integers to the outputs of a generator.
+Filtering the stream will still allow the original indices
+to be recovered at a later stage.</p>
+
+<p>The procedure <code>gpeek</code> makes generators "peekable" in the sense of
+<code>peek-char</code> and <code>peek-u8</code>,
+and even "pokeable" in the sense of C's <code>ungetc()</code>.
+This assimilates them to character or byte ports.</p>
+
+<p>The <code>gchoice</code> operation uses one generator to dictate
+which one of a number of other generators will be drawn on to
+provide the next value.  If used with the
+<code>make-categorical-generator</code> procedure of
+[SRFI 194](https://srfi.schemers.org/srfi-194/srfi-194.html)
+as the first argument, it can choose from the other generators
+using a weighted probability.</p>
+
+<p>Finally, <code>stream->generator</code>
+and <code>generator->stream</code> allow
+conversion between generators and
+[SRFI 41](https://srfi.schemers.org/srfi-41/srfi-41.html) streams,
+and indirectly between streams and
+[SRFI 127](https://srfi.schemers.org/srfi-127/srfi-127.html) lazy sequences,
+which are either lists or improper lists
+with a generator in their tails.</p>
+
+<h2 id="specification">Specification</h2>
+<p><code>(gchain-generators </code><em>constructor</em> <em>operation</em> ...<code>)</code></p>
+<p>Creates a generator from a generator constructor plus
+a chain of generator operations.  The first argument is
+called with no arguments, the remaining arguments with
+one argument.
+For example, <code>(gchain-generators gmake gfoo gbar)</code> returns the same
+generator as <code>(gbar (gfoo (gmake)))</code>.</p>
+<p>Since it is typically necessary to pass additional arguments to the
+constructor and the operations, the arguments to <code>gchain-generator</code>
+will usually be lambda expressions.  For example:</p>
+<blockquote><pre><code>(gchain-generators
+  (lambda () (make-iota-generator 100))
+  (lambda (g) (gfilter even? g))
+  (lambda (g) (ggroup 5 g)))
+</code></pre></blockquote>
+<p>returns a generator that outputs the values
+<code>(0 2 4 6 8)</code>, <code>(10 12 14 16 18)</code>, ... <code>(90 92 94 96 98)</code>.
+Such calls can be written more compactly using the <code>cut</code> macro from
+<a href="https://srfi.schemers.org/srfi-26/srfi-26.html" rel="nofollow">SRFI 26</a>:</p>
+<blockquote><pre><code>(gchain-generators
+  (cut make-iota-generator 100)
+  (cut gfilter even? &lt;&gt;)
+  (cut ggroup 5 &lt;&gt;))
+</code></pre></blockquote>
+
+<p><code>(accumulate-generated-values
+</code><em>accumulator generator</em><code>)</code></p>
+<p>Invokes <em>generator</em>, passing the value
+it returns to <em>accumulator</em>.  If the value was an end-of-file
+object, <code>accumulate-generated-values</code> returns whatever the
+accumulator returned.  Otherwise, the process is repeated.</p>
+<p><code>(gdelete-duplicates </code><em>gen</em> [ = ]<code>)</code></p>
+<p>Creates a generator that returns whatever gen returns, except for any items
+that are equal to an earlier item in the sense of =, which defaults to <code>equal?</code>.
+The = predicate is passed exactly two arguments,
+of which the first was generated by gen before the second.</p>  Example:
+<blockquote><pre><code>(generator-&gt;list (gdelete-duplicates (list-&gt;generator '(a a b c a a a d c))))
+  ⇒ (a b c d)
+</code></pre></blockquote>
+<p><code>(genumerate </code><em>gen</em><code>)</code></p>
+<p>Creates a generator that returns pairs.
+The car of each pair is an exact integer counting up by 1 from 0.
+The cdr of each pair is the result of <em>gen</em>.</p>
+<p><code>(gpeek </code><em>gen</em><code>)</code></p>
+<p>Returns a procedure <em>p</em> that behaves like a generator but with more capabilities.
+If called with zero arguments, it invokes the underlying generator <em>gen</em>.
+However, if called with the argument <code>peek</code>, it retrieves the next value
+from <em>gen</em> and returns it, but also saves it in such a way that the
+next zero-argument call on <em>p</em> will return it,
+analogously to <code>peek-char</code> and <code>peek-u8</code>.
+If called with two arguments, <code>poke</code> and an object <em>obj</em>,
+it will save <em>obj</em> so that the next zero-argument call on <em>p</em> will return it.</p>
+<ul>
+<li>Calling <em>peek</em> after <em>peek</em> will return the same value both times.</li>
+<li>Calling <em>poke</em> after <em>poke</em> will make the newer poke overwrite the older poke.</li>
+<li>Calling <em>peek</em> after <em>poke</em> will return the latest poke.</li>
+<li>Calling <em>poke</em> after <em>peek</em> will overwrite the latest peek with the poke.</li>
+</ul>
+<p><code>(gchoice </code><em>choice-gen source-gen</em> ...<code>)</code></p>
+<p>Returns a generator <em>g</em> that behaves as follows:</p>
+<p>When <em>g</em> is invoked, it first invokes <em>choice-gen</em> to return an index value <em>i</em>.
+It is an error if <em>i</em> is not an exact integer between 0 (inclusive)
+and the number of <em>source-gens</em> (exclusive).
+Then the <em>i</em>th <em>source-gen</em> is invoked and its value returned by <em>g</em>.</p>
+<p>If <em>choice-gen</em> is exhausted, <em>g</em> returns an end of file object.
+If the chosen <em>source-gen</em> is exhausted, <em>g</em> remembers that fact
+and invokes <em>choice-gen</em> until it returns the index of a <em>source-gen</em>
+that has not been exhausted.  When all <em>source-gens</em> are exhausted,
+<em>g</em> returns an end of file object.</p>
+<p>Composing <code>make-iota-generator</code> and <code>make-circular-generator</code>
+from <a href="http://srfi.schemers.org/srfi-158/srfi-158.html" rel="nofollow">SRFI 158</a>
+performs round-robin selection of the <em>source-gens</em>.</p>
+<p><code>(stream-&gt;generator </code><em>stream</em><code>)</code></p>
+<p>Returns a generator that steps through the elements of a SRFI 41 stream.</p>
+<p><code>(generator-&gt;stream </code><em>generator</em><code>)</code></p>
+<p>Returns a SRFI 41 stream containing the values of a generator.</p>
+
+<h2 id="implementation">Implementation</h2>
+
+<p>The sample implementation of this SRFI is in the repository for it.</p>
+
+<h2 id="acknowledgements">Acknowledgements</h2>
+
+<p>Thanks to all who participated on the SRFI mailing list.</p>
+
+<h2 id="copyright">Copyright</h2>
+<p>&copy; 2020 John Cowan (text), Arvydas Silanskas (implementation).</p>
+
+<p>
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:</p>
+
+<p>
+  The above copyright notice and this permission notice (including the
+  next paragraph) shall be included in all copies or substantial
+  portions of the Software.</p>
+<p>
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.</p>
+
+  <hr>
+  <address>Editor: <a href="mailto:srfi-editors+at+srfi+dot+schemers+dot+org">Arthur A. Gleckler</a></address></body></html>
