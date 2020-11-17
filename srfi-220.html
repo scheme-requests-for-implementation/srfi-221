@@ -44,7 +44,7 @@ to produce a desired result.<p>
 procedure captures the output of a generator
 and passes it directly to an accumulator
 until the generator is exhausted.  The
-generator can also be a <code>gchain-generators</code> chain,
+generator can be a <code>gchain-generators</code> chain,
 which allows arbitrary transformations.</p>
 
 <p>The <code>gdelete-duplicates</code> procedure is an enhancement
@@ -59,22 +59,22 @@ to be recovered at a later stage.</p>
 <p>The procedure <code>gpeek</code> makes generators "peekable" in the sense of
 <code>peek-char</code> and <code>peek-u8</code>,
 and even "pokeable" in the sense of C's <code>ungetc()</code>.
-This assimilates them to character or byte ports.</p>
+This partly assimilates them to character or byte ports.</p>
 
 <p>The <code>gchoice</code> operation uses one generator to dictate
 which one of a number of other generators will be drawn on to
 provide the next value.  If used with the
 <code>make-categorical-generator</code> procedure of
-[SRFI 194](https://srfi.schemers.org/srfi-194/srfi-194.html)
+<a href="https://srfi.schemers.org/srfi-194/srfi-194.html">SRFI 194</a>
 as the first argument, it can choose from the other generators
 using a weighted probability.</p>
 
 <p>Finally, <code>stream->generator</code>
 and <code>generator->stream</code> allow
 conversion between generators and
-[SRFI 41](https://srfi.schemers.org/srfi-41/srfi-41.html) streams,
+<a href="https://srfi.schemers.org/srfi-41/srfi-41.html">SRFI 41</a> streams,
 and indirectly between streams and
-[SRFI 127](https://srfi.schemers.org/srfi-127/srfi-127.html) lazy sequences,
+<a href="https://srfi.schemers.org/srfi-127/srfi-127.html">SRFI 127</a> lazy sequences,
 which are either lists or improper lists
 with a generator in their tails.</p>
 
