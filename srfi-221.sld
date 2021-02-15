@@ -1,9 +1,8 @@
-(module srfi-221 ()
+(define-library (srfi-221)
   
   (import 
-    (r5rs)
-    (only (chicken base) unless error include case-lambda)
-    (only (chicken module) export)
+    (scheme base)
+    (scheme case-lambda)
     (srfi 1) ;; lists
     (srfi 41) ;; streams
     (srfi 158)) ;; generators
@@ -18,7 +17,4 @@
     generator->stream
     stream->generator)
   
-  (begin
-    (define (eof-object) #!eof))
-
   (include "srfi-221-impl.scm"))

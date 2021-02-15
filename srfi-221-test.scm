@@ -2,7 +2,7 @@
         (scheme case-lambda)
         (srfi 41)
         (srfi 158)
-        (more-generators))
+        (srfi-221))
 
 (cond-expand
   (chibi (begin
@@ -23,7 +23,7 @@
        (gtake g-expect take-count)
        (gtake g-actual take-count)))))
 
-(test-begin "More generators")
+(test-begin "srfi-221")
 
 (test-group 
   "accumulate-generated-values"
