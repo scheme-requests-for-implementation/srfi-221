@@ -2,7 +2,7 @@
         (scheme case-lambda)
         (srfi 41)
         (srfi 158)
-        (srfi-221))
+        (srfi 221))
 
 (cond-expand
   (chibi (begin

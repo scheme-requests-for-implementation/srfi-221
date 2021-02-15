@@ -1,4 +1,4 @@
-(define-library (srfi-221)
+(define-library (srfi 221)
   
   (import 
     (scheme base)
@@ -17,4 +17,4 @@
     generator->stream
     stream->generator)
   
-  (include "srfi-221-impl.scm"))
+  (include "221-impl.scm"))

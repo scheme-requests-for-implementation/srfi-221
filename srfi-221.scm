@@ -1,4 +1,5 @@
-(module srfi-221 ()
+;;;; Chicken module
+(module (srfi 221) ()
   
   (import 
     (r5rs)
@@ -21,4 +22,4 @@
   (begin
     (define (eof-object) #!eof))
 
-  (include "srfi-221-impl.scm"))
+  (include "srfi/221-impl.scm"))
