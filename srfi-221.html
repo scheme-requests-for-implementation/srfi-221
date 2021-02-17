@@ -17,14 +17,14 @@ The editor will add this section.
 
 <h2 id="abstract">Abstract</h2>
 
-This is a set of convenience routines for generators and accumulators
+<p>This is a set of convenience routines for generators and accumulators
 intended to blend in with
 <a href="https://srfi.schemers.org/srfi-158/srfi-158.html">SRFI 158</a>.
-This SRFI recommends that they be added to the
+The authors recommends that they be added to the
 <code>(srfi 158)</code> library provided by
 users or implementations.
 If they are approved by the R7RS-large process,
-they can also be added to <code>(r7rs generator)</code>.
+they can also be added to <code>(r7rs generator)</code>.</p>
 
 <h2 id="issues">Issues</h2>
 
@@ -105,7 +105,7 @@ Such calls can be written more compactly using the <code>cut</code> macro from
 </code></pre></blockquote>
 
 <p><code>(accumulate-generated-values
-</code><em>accumulator generator</em><code>)</code></p>
+</code><em>accumulator</em> <em>generator</em><code>)</code></p>
 <p>Invokes <em>generator</em>, passing the value
 it returns to <em>accumulator</em>.  If the value was an end-of-file
 object, <code>accumulate-generated-values</code> returns whatever the
@@ -137,19 +137,19 @@ it will save <em>obj</em> so that the next zero-argument call on <em>p</em> will
 <li>Calling <em>peek</em> after <em>poke</em> will return the latest poke.</li>
 <li>Calling <em>poke</em> after <em>peek</em> will overwrite the latest peek with the poke.</li>
 </ul>
-<p><code>(gchoice </code><em>choice-gen source-gen</em> ...<code>)</code></p>
+<p><code>(gchoice </code><em>choice-gen</em> <em>source-gen</em> ...<code>)</code></p>
 <p>Returns a generator <em>g</em> that behaves as follows:</p>
 <p>When <em>g</em> is invoked, it first invokes <em>choice-gen</em> to return an index value <em>i</em>.
 It is an error if <em>i</em> is not an exact integer between 0 (inclusive)
 and the number of <em>source-gens</em> (exclusive).
 Then the <em>i</em>th <em>source-gen</em> is invoked and its value returned by <em>g</em>.</p>
-<p>If <em>choice-gen</em> is exhausted, <em>g</em> returns an end of file object.
+<p>If <em>choice-gen</em> is exhausted, <em>g</em> returns an end-of-file object.
 If the chosen <em>source-gen</em> is exhausted, <em>g</em> remembers that fact
 and invokes <em>choice-gen</em> until it returns the index of a <em>source-gen</em>
 that has not been exhausted.  When all <em>source-gens</em> are exhausted,
-<em>g</em> returns an end of file object.</p>
+<em>g</em> returns an end-of-file object.</p>
 <p>Composing <code>make-iota-generator</code> and <code>make-circular-generator</code>
-from <a href="http://srfi.schemers.org/srfi-158/srfi-158.html" rel="nofollow">SRFI 158</a>
+from <a href="https://srfi.schemers.org/srfi-158/srfi-158.html" rel="nofollow">SRFI 158</a>
 performs round-robin selection of the <em>source-gens</em>.</p>
 <p><code>(stream-&gt;generator </code><em>stream</em><code>)</code></p>
 <p>Returns a generator that steps through the elements of a SRFI 41 stream.</p>
