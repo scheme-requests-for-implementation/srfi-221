@@ -21,11 +21,11 @@
   (lambda ()
     (let loop ((value (gen)))
      (cond
-       ((eof-object? value) 
+       ((eof-object? value)
         value)
-       ((seen? value) 
+       ((seen? value)
         (loop (gen)))
-       (else 
+       (else
          (begin
            (set! seen (cons value seen))
            value))))))
@@ -40,7 +40,7 @@
   (let ((saved-value #f)
         (has-saved-value? #f))
    (case-lambda
-     (() 
+     (()
       (if (not has-saved-value?)
           (gen)
           (let ((ret saved-value))
@@ -91,12 +91,12 @@
       ;; choice-gen have been exhausted
       ((eof-object? i) (eof-object))
       ;; source-gen returned bad value
-      ((or (not (integer? i)) 
-           (< i 0) 
-           (>= i l)) 
-       (error (string-append "choice-gen didn't return an integer in range 0 to " 
+      ((or (not (integer? i))
+           (< i 0)
+           (>= i l))
+       (error (string-append "choice-gen didn't return an integer in range 0 to "
                              (number->string (- l 1)))))
-      (else 
+      (else
         (let ((gen (vector-ref source-gens-v i)))
          (if (not gen)
              ;; we picked exhausted generator -- pick again

@@ -25,7 +25,7 @@
 
 (test-begin "srfi-221")
 
-(test-group 
+(test-group
   "accumulate-generated-values"
   (define expect '(1 2 3 4))
   (define actual
@@ -37,30 +37,30 @@
 (test-group
   "gdelete-duplicates"
   ;; test normal case
-  (test-g-equal (generator 'a 'b 'c 'd) 
+  (test-g-equal (generator 'a 'b 'c 'd)
                 (gdelete-duplicates
                   (generator 'a 'a 'b 'c 'a 'a 'a 'd 'c)))
-  
+
   ;; test empty
   (test-g-equal (generator)
                 (gdelete-duplicates (generator)))
-  
+
   ;; test infinite case with take
   (test-g-equal (generator 'a 'b 'c 'd)
-                (gdelete-duplicates 
+                (gdelete-duplicates
                     (gtake (circular-generator 'a 'b 'c 'd) 5))))
 
 (test-group
   "genumerate"
-  
+
   ;; test normal case
   (test-g-equal (generator '(0 . a) '(1 . b) '(2 . c))
                 (genumerate (generator 'a 'b 'c)))
-  
+
   ;; test empty
   (test-g-equal (generator)
                 (genumerate (generator)))
-  
+
   ;; infinite case with take
   (test-g-equal (generator '(0 . a) '(1 . b) '(2 . c))
                 (genumerate (circular-generator 'a 'b 'c))
@@ -69,12 +69,12 @@
 
 (test-group
   "gpeek peek"
-  
+
   ;; test do nothing
   (test-g-equal
     (generator 1 2 3 4)
     (gpeek (generator 1 2 3 4)))
-  
+
   ;; test peek
   (test-g-equal
     (generator 2 3 4)
@@ -83,10 +83,10 @@
       ;; can peek many times, same result
       (test-equal 1 (g* 'peek))
       (test-equal 1 (g* 'peek))
-      
+
       (test-equal 1 (g*))
       g*))
-  
+
   ;; test poke
   (test-g-equal
     (generator 2 3 4)
@@ -95,10 +95,10 @@
       ;; can poke many times, last poke saved
       (g* 'poke 0)
       (g* 'poke 1)
-      
+
       (test-equal 1 (g*))
       g*))
-  
+
   ;; test peek then poke
   (test-g-equal
     (generator 1 3 4)
@@ -107,7 +107,7 @@
       (test-equal 2 (g* 'peek))
       (g* 'poke 1)
       g*))
-  
+
   ;; test poke then peek
   (test-g-equal
     (generator 1 2 3 4)
@@ -119,13 +119,13 @@
 
 (test-group
   "gchain-generators"
-  
+
   (test-g-equal
     (generator 1 2 3 4)
     (gchain-generators
       (lambda () (make-range-generator 1))
       (lambda (g) (gtake g 4))))
-  
+
   (test-g-equal
     (generator 1 2 3 4)
     (gchain-generators
@@ -133,7 +133,7 @@
 
 (test-group
   "gchoice"
-  
+
   ;; test normal
   (test-g-equal
     (generator 1 2 1 3)
@@ -142,7 +142,7 @@
       (circular-generator 1)
       (circular-generator 2)
       (circular-generator 3)))
-  
+
   ;; test exhausted source
   (test-g-equal
     (generator 1 2 3)
@@ -165,8 +165,8 @@
   (test-stream-equal
     (stream 1 2 3)
     (generator->stream (generator 1 2 3)))
-  
-  ;; test infinite with take 
+
+  ;; test infinite with take
   (test-stream-equal
     (stream 1 2 3)
     (stream-take 3 (generator->stream (circular-generator 1 2 3)))))
@@ -174,10 +174,10 @@
 (test-group
   "stream->generator"
   ;; test normal
-  (test-g-equal 
+  (test-g-equal
     (generator 1 2 3)
     (stream->generator (stream 1 2 3)))
-  
+
   ;; test infinite with take
   (test-g-equal
     (circular-generator 1 2 3)
