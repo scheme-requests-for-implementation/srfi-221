@@ -36,33 +36,6 @@
     (make-range-generator 0)
     gen))
 
-(define (gpeek gen)
-  (let ((saved-value #f)
-        (has-saved-value? #f))
-   (case-lambda
-     (()
-      (if (not has-saved-value?)
-          (gen)
-          (let ((ret saved-value))
-           (set! saved-value #f)
-           (set! has-saved-value? #f)
-           ret)))
-     ((peek)
-      (unless (equal? 'peek peek)
-        (error "peeking with wrong argument, expected 'peek"))
-      (if has-saved-value?
-          saved-value
-          (begin
-            (set! saved-value (gen))
-            (set! has-saved-value? #t)
-            saved-value)))
-     ((poke obj)
-      (unless (equal? 'poke poke)
-        (error "poking with wrong first argument, expected 'poke"))
-      (set! saved-value obj)
-      (set! has-saved-value? #t)
-      obj))))
-
 (define (gchain-generators constr . ops)
   (let loop ((gen (constr))
              (ops ops))

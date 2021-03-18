@@ -11,7 +11,6 @@
     accumulate-generated-values
     gdelete-duplicates
     genumerate
-    gpeek
     gchain-generators
     gchoice
     generator->stream
