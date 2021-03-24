@@ -46,8 +46,8 @@ of procedures devised since SRFI 158 was finalized.
 Consequently, this section provides a rationale
 for each procedure independently.</p>
 
-The <code>gchain-generators</code> procedure,
-in cooperation with generator operations
+The <code>gcompose-left</code> and <code>gcompose-right</code> procedures,
+in cooperation with generator constructors and operations
 (that is, procedures that accept one or more generators
 and return a generator)
 from SRFI 158 or elsewhere, make it easier to set up
@@ -59,7 +59,8 @@ to produce a desired result.<p>
 procedure captures the output of a generator
 and passes it directly to an accumulator
 until the generator is exhausted.  The
-generator can be a <code>gchain-generators</code> chain,
+generator can be a <code>gcompose-left</code>
+or <code>gcompose-right</code> chain,
 which allows arbitrary transformations.</p>
 
 <p>The <code>gdelete-duplicates</code> procedure is an enhancement
@@ -89,26 +90,34 @@ which are either lists or improper lists
 with a generator in their tails.</p>
 
 <h2 id="specification">Specification</h2>
-<p><code>(gchain-generators </code><em>constructor</em> <em>operation</em> ...<code>)</code></p>
+<p><code>(gcompose-left </code><em>constructor</em> <em>operation</em> ...<code>)</code><br />
+<code>(gcompose-right </code><em>operation</em> ... <em>constructor</em><code>)</code></p>
 <p>Creates a generator from a generator constructor plus
-a chain of generator operations.  The first argument is
+a chain of generator operations.  The first/last argument is
 called with no arguments, the remaining arguments with
-one argument.
-For example, <code>(gchain-generators gmake gfoo gbar)</code> returns the same
-generator as <code>(gbar (gfoo (gmake)))</code>.</p>
+the result of calling the previous/following argument.
+For example, <code>(gcompose-left make-gen gfoo gbar)</code> returns the same
+generator as <code>(gbar (gfoo (make-gen)))</code>,
+as does <code>(gcompose-right gbar gfoo make-gen)</code>.
 <p>Since it is typically necessary to pass additional arguments to the
-constructor and the operations, the arguments to <code>gchain-generator</code>
+constructor and the operations, the arguments
 will usually be lambda expressions.  For example:</p>
-<blockquote><pre><code>(gchain-generators
+<blockquote><pre><code>(gcompose-left
   (lambda () (make-iota-generator 100))
   (lambda (g) (gfilter even? g))
   (lambda (g) (ggroup 5 g)))
 </code></pre></blockquote>
 <p>returns a generator that outputs the values
 <code>(0 2 4 6 8)</code>, <code>(10 12 14 16 18)</code>, ... <code>(90 92 94 96 98)</code>.
+So does
+<blockquote><pre><code>(gcompose-right
+  (lambda (g) (ggroup 5 g)))
+  (lambda (g) (gfilter even? g))
+  (lambda () (make-iota-generator 100)).
+</code></pre></blockquote>
 Such calls can be written more compactly using the <code>cut</code> macro from
 <a href="https://srfi.schemers.org/srfi-26/srfi-26.html" rel="nofollow">SRFI 26</a>:</p>
-<blockquote><pre><code>(gchain-generators
+<blockquote><pre><code>(gcompose-left
   (cut make-iota-generator 100)
   (cut gfilter even? &lt;&gt;)
   (cut ggroup 5 &lt;&gt;))
