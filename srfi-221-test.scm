@@ -35,22 +35,6 @@
   (test-equal expect actual))
 
 (test-group
-  "gdelete-duplicates"
-  ;; test normal case
-  (test-g-equal (generator 'a 'b 'c 'd)
-                (gdelete-duplicates
-                  (generator 'a 'a 'b 'c 'a 'a 'a 'd 'c)))
-
-  ;; test empty
-  (test-g-equal (generator)
-                (gdelete-duplicates (generator)))
-
-  ;; test infinite case with take
-  (test-g-equal (generator 'a 'b 'c 'd)
-                (gdelete-duplicates
-                    (gtake (circular-generator 'a 'b 'c 'd) 5))))
-
-(test-group
   "genumerate"
 
   ;; test normal case
@@ -68,67 +52,31 @@
   )
 
 (test-group
-  "gpeek peek"
-
-  ;; test do nothing
-  (test-g-equal
-    (generator 1 2 3 4)
-    (gpeek (generator 1 2 3 4)))
-
-  ;; test peek
-  (test-g-equal
-    (generator 2 3 4)
-    (let* ((g (generator 1 2 3 4))
-           (g* (gpeek g)))
-      ;; can peek many times, same result
-      (test-equal 1 (g* 'peek))
-      (test-equal 1 (g* 'peek))
-
-      (test-equal 1 (g*))
-      g*))
-
-  ;; test poke
-  (test-g-equal
-    (generator 2 3 4)
-    (let* ((g (generator 2 3 4))
-           (g* (gpeek g)))
-      ;; can poke many times, last poke saved
-      (g* 'poke 0)
-      (g* 'poke 1)
-
-      (test-equal 1 (g*))
-      g*))
-
-  ;; test peek then poke
-  (test-g-equal
-    (generator 1 3 4)
-    (let* ((g (generator 2 3 4))
-           (g* (gpeek g)))
-      (test-equal 2 (g* 'peek))
-      (g* 'poke 1)
-      g*))
-
-  ;; test poke then peek
-  (test-g-equal
-    (generator 1 2 3 4)
-    (let* ((g (generator 2 3 4))
-           (g* (gpeek g)))
-      (g* 'poke 1)
-      (test-equal 1 (g* 'peek))
-      g*)))
-
-(test-group
-  "gchain-generators"
+  "gcompose-left"
 
   (test-g-equal
     (generator 1 2 3 4)
-    (gchain-generators
+    (gcompose-left
       (lambda () (make-range-generator 1))
       (lambda (g) (gtake g 4))))
 
   (test-g-equal
     (generator 1 2 3 4)
-    (gchain-generators
+    (gcompose-left
+      (lambda () (generator 1 2 3 4)))))
+
+(test-group
+  "gcompose-right"
+
+  (test-g-equal
+    (generator 1 2 3 4)
+    (gcompose-right
+      (lambda (g) (gtake g 4))
+      (lambda () (make-range-generator 1))))
+
+  (test-g-equal
+    (generator 1 2 3 4)
+    (gcompose-right
       (lambda () (generator 1 2 3 4)))))
 
 (test-group

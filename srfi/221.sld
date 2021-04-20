@@ -11,7 +11,8 @@
     accumulate-generated-values
     gdelete-duplicates
     genumerate
-    gchain-generators
+    gcompose-left
+    gcompose-right
     gchoice
     generator->stream
     stream->generator)

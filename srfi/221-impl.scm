@@ -36,7 +36,7 @@
     (make-range-generator 0)
     gen))
 
-(define (gchain-generators constr . ops)
+(define (gcompose-left constr . ops)
   (let loop ((gen (constr))
              (ops ops))
    (if (null? ops)
@@ -44,6 +44,9 @@
        (let* ((op (car ops))
               (new-gen (op gen)))
          (loop new-gen (cdr ops))))))
+
+(define (gcompose-right . args)
+  (apply gcompose-left (reverse args)))
 
 (define (gchoice choice-gen . source-gens)
   (define source-gens-v (list->vector source-gens))

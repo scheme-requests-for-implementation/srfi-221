@@ -11,9 +11,9 @@
 
   (export
     accumulate-generated-values
-    gdelete-duplicates
     genumerate
-    gchain-generators
+    gcompose-right
+    gcompose-left
     gchoice
     generator->stream
     stream->generator)
