@@ -111,7 +111,7 @@ So does
   (lambda (g) (gfilter even? g))
   (lambda () (make-iota-generator 100)).
 </code></pre></blockquote>
-Such calls can be written more compactly using the <code>cut</code> macro from
+<p>Such calls can be written more compactly using the <code>cut</code> macro from
 <a href="https://srfi.schemers.org/srfi-26/srfi-26.html" rel="nofollow">SRFI 26</a>:</p>
 <blockquote><pre><code>(gcompose-left
   (cut make-iota-generator 100)
