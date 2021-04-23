@@ -102,7 +102,7 @@ will usually be lambda expressions.  For example:</p>
 <blockquote><pre><code>(gcompose-left
   (lambda () (make-iota-generator 100))
   (lambda (g) (gfilter even? g))
-  (lambda (g) (ggroup 5 g)))
+  (lambda (g) (ggroup g 5)))
 </code></pre></blockquote>
 <p>returns a generator that outputs the values
 <code>(0 2 4 6 8)</code>, <code>(10 12 14 16 18)</code>, ... <code>(90 92 94 96 98)</code>.
